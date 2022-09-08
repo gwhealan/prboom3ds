@@ -19,6 +19,9 @@
 #include "w_wad.h"
 #include "keyboard.h"
 #include "d_main.h"
+#include "edits.h"
+
+//#define ENABLE_GYRO_CONTROLS
 
 #ifdef DISABLE_DOUBLEBUFFER
 int use_doublebuffer = 0;
@@ -35,7 +38,11 @@ void AM_ZoomOut();
 void AM_ZoomIn();
 
 touchPosition	g_lastTouch = { 0, 0 };
+#ifdef GYRO_CONTROLS
+angularRate		g_gyro = { 0, 0, 0 };
+#else
 touchPosition	g_currentTouch = { 0, 0 };
+#endif
 
 //0=DS Bit,1=game key, 2=menu key
 int keys3ds[32][3] = {
@@ -384,7 +391,18 @@ void DS_Controls(void) {
 		g_lastTouch.px <<= 7;
 		g_lastTouch.py <<= 7;
 	}
-
+#ifdef GYRO_CONTROLS
+	int dx;
+	hidGyroRead(&g_gyro);
+	if((dx = -(g_gyro.z >> 4))) {
+		event_t event;
+		event.type = ev_mouse;
+		event.data1 = 0;
+		event.data2 = dx << 4;
+		event.data3 = 0;
+		D_PostEvent(&event);
+	}
+#else
 	if (keysHeld() & KEY_TOUCH) // this is only for x axis
 	{
 		int dx, dy;
@@ -409,7 +427,7 @@ void DS_Controls(void) {
 		g_lastTouch.px = (g_lastTouch.px + g_currentTouch.px) / 2;
 		g_lastTouch.py = (g_lastTouch.py + g_currentTouch.py) / 2;
 	}
-
+#endif
 }
 
 /**

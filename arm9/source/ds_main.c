@@ -11,6 +11,7 @@
 #include "m_argv.h"
 #include "z_zone.h"
 #include "keyboard.h"
+#include "edits.h"
 
 #if 0
 #include "khax.h"
@@ -72,13 +73,16 @@ static void sys_init() {
 	}
 #endif
 	
-	gfxSet3D(true);
+	gfxSet3D(false);
 
 	//srand(svcGetSystemTick());
 
 	//consoleSetWindow(0, 0, 0, 40, 15);
 	keyboard_init();
 	printf("keyboard init\n");
+#ifdef GYRO_CONTROLS
+	HIDUSER_EnableGyroscope();
+#endif
 	//svcSleepThread(5000000000LL);
 	//SD_init();
 	//sdmcInit();
@@ -112,6 +116,9 @@ void I_Quit() {
 	}
 
 	gfxSet3D(false);
+#ifdef GYRO_CONTROLS
+	HIDUSER_DisableGyroscope();
+#endif
 	osSetSpeedupEnable(false);
 	//ndspExit();
 #if 0
